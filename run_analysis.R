@@ -29,27 +29,36 @@ run_analysis <- function() {
   
   #Read Activity Files : Test  & Train
   datTestActivity <-
-    read.table(file.path(filePath,"test","Y_test.txt"),header = FALSE)
-  str(datTestActivity)
+    read.table(file.path(extractedfilePath,"test","y_test.txt"),header = FALSE)
+  
+  #description(datTestActivity)
+  
   datTrainActivity <-
-    read.table(file.path(filePath,"train","Y_train.txt"),header = FALSE)
-  str(datTrainActivity)
+    read.table(file.path(extractedfilePath,"train","y_train.txt"),header = FALSE)
+  
+  #description(datTrainActivity)
   
   #Read Subject Files :
   datTestSubject <-
-    read.table(file.path(filePath,"test","subject_test.txt"),header = FALSE)
-  str(datTestSubject)
+    read.table(file.path(extractedfilePath,"test","subject_test.txt"),header = FALSE)
+  
+  #description(datTestSubject)
+  
   datTrainSubject <-
-    read.table(file.path(filePath,"train","subject_train.txt"),header = FALSE)
-  str(datTrainSubject)
+    read.table(file.path(extractedfilePath,"train","subject_train.txt"),header = FALSE)
+  
+  #description(datTrainSubject)
   
   #Read Feature Files :
   datTestFeature <-
-    read.table(file.path(filePath,"test","X_test.txt"),header = FALSE)
-  str(datTestFeature)
+    read.table(file.path(extractedfilePath,"test","X_test.txt"),header = FALSE)
+  
+  #description(datTestFeature)
+  
   datTrainFeature <-
-    read.table(file.path(filePath,"train","X_train.txt"),header = FALSE)
-  str(datTrainFeature)
+    read.table(file.path(extractedfilePath,"train","X_train.txt"),header = FALSE)
+  
+  #description(datTrainFeature)
   
   #Row Merge/Append test and training Data
   datSubject <- rbind(datTestSubject,datTrainSubject)
@@ -61,11 +70,10 @@ run_analysis <- function() {
   names(datActivity)<- c("activity")
   
   featureNames <-
-    read.table(paste(filePath,"features.txt", sep = "/"),header = FALSE)
+    read.table(paste(extractedfilePath,"features.txt", sep = "/"),header = FALSE)
   
   names(datFeature)<- featureNames$V2
-  #setNames(datFeature, names(datFeature),featureNames$V2) 
-  
+   
   #Column merge the data
   d1 <- cbind(datSubject,datActivity)
   mergedData <- cbind(datFeature,d1)
@@ -77,14 +85,14 @@ run_analysis <- function() {
   
   selected <- c(as.character(subFeatureNames),"subject","activity")
   data <- subset(mergedData, select = selected)
-  str(data)
+  #str(data)
   
   #Assign descriptive names to the activity
   lblActivity <-
-    read.table(paste(filePath,"activity_labels.txt", sep = "/"),header = FALSE)
+    read.table(paste(extractedfilePath,"activity_labels.txt", sep = "/"),header = FALSE)
   
-  str(lblActivity)
-  head(data$activity,10)
+  #description(lblActivity)
+  #description(data$activity,10)
   
   #assign descriptive names
   names(data) <- gsub("^t", "time", names(data))
@@ -94,17 +102,18 @@ run_analysis <- function() {
   names(data) <- gsub("Mag", "Magnitude", names(data))
   names(data) <- gsub("BodyBody", "Body", names(data))
   
-  names(data)
+  str(data)
   
   
   #create tidy data and write back to file
-  tidyData <- aggregate(. ~ subject + activity, mergedData,mean)
+  tidyData <- aggregate(. ~ subject + activity, data,mean)
   tidyData <- tidyData[order(tidyData$subject,tidyData$activity),]
   write.table(tidyData,file = "tidyData.txt", row.names = FALSE)
   
-  summary(tidyData)
+  library(knitr)
+  knit2html("codebook.Rmd");
   
-  knit("makeCodebook.Rmd", output = "codebook.md", encoding = "ISO8859-1", quiet = TRUE)
-  markdownToHTML("codebook.md", "codebook.html")
+  #knit("makeCodebook.Rmd", output = "codebook.md", encoding = "ISO8859-1", quiet = TRUE)
+  #markdownToHTML("codebook.md", "codebook.html")
   
   }
